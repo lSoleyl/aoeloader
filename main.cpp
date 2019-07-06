@@ -12,7 +12,7 @@
 void HandleError(const char* context) {
   char* buffer;
   auto err = GetLastError();
-  FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_IGNORE_INSERTS, NULL, err, NULL, (LPSTR)&buffer, NULL, NULL);
+  FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_IGNORE_INSERTS, NULL, err, NULL, (LPSTR)&buffer, NULL, NULL);
 
   std::ostringstream msg;
   msg << context << ": " << buffer;
@@ -54,7 +54,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdLine
     STARTUPINFO si = {sizeof(STARTUPINFO)};
     PROCESS_INFORMATION pi = {0};
     if (!CreateProcess("age3x.exe", NULL, NULL, NULL, FALSE, CREATE_SUSPENDED, NULL, NULL, &si, &pi)) {
-      HandleError("CreateProcess()");
+      HandleError("CreateProcess");
     }
 
     //TODO validate we have the correct version of this process
@@ -70,7 +70,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdLine
 
     // Now let the process run
     if (ResumeThread(pi.hThread) == -1) {
-      HandleError("ResumeThread()");
+      HandleError("ResumeThread");
     }
 
   } catch (std::exception& ex) {
