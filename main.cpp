@@ -34,9 +34,11 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdLine
       HandleError("WriteProcessMemory(BuildLimit)");
     }
 
+#ifndef KEEP_POPULATION_CAP
     if (!populationCap.Apply(pi.hProcess)) {
       HandleError("WriteProcessMemory(PopulationCap)");
     }
+#endif
 
     // Now let the process run
     if (ResumeThread(pi.hThread) == -1) {
