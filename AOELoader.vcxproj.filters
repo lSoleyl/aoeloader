@@ -20,10 +20,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="nop_memory.h">
+    <ClInclude Include="win_error.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="win_error.h">
+    <ClInclude Include="patch_memory.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
