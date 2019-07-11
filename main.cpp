@@ -4,21 +4,25 @@
 #include <iostream>
 #include <vector>
 
-
-#include "patch_memory.h"
 #include "win_error.h"
+#include "patch_memory.h"
+
 
 
 // This memory address initializes some kind of getter for the BuildLimit property skipping this code
 // removes the build limit for most units
-NOP_MEMORY buildLimit(0x008f601e, 25);
+NOP_MEMORY buildLimit(0x008f601e, 25, "8d442408 5068e069 b5008bce c7442410"
+                                      "76098f00 e8e858b7 ff");
 
 // For Banks, Forts, ... (units with variable build limit?) the Build limit gets set to 1 instead and the following patch
 // will explicitly return -1 (infinite) for these units
-WRITE_MEMORY buildLimitAccess(0x00453ca0, {0xb8, 0xff, 0xff, 0xff, 0xff, NOP}); // b8 ffffffff 90 == mov eax, -1; nop...
+WRITE_MEMORY buildLimitAccess(0x00453ca0, "b8 ffffffff 90", "8b800801 0000"); // b8 ffffffff 90 == mov eax, -1; nop...
 
 // This skips the complete population cap check.
-NOP_MEMORY populationCap(0x004278bc, 62);
+NOP_MEMORY populationCap(0x004278bc, 62, "3dc80000 000f8f9c 1008008b 0da0e4bc"
+                                         "008b893c 0100008b 891c0300 003bc10f"
+                                         "8f8c1008 008b92b4 04000085 d20f8f85"
+                                         "1008003d fa000000 0f8f8110 0800");
 
 
 const char* PROGRAM_FILE = "age3x.exe";
@@ -28,12 +32,16 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdLine
     // Launch our process in suspended state
     STARTUPINFO si = {sizeof(STARTUPINFO)};
     PROCESS_INFORMATION pi = {0};
-    if (!CreateProcess("age3x.exe", NULL, NULL, NULL, FALSE, CREATE_SUSPENDED, NULL, NULL, &si, &pi)) {
+    if (!CreateProcess(PROGRAM_FILE, NULL, NULL, NULL, FALSE, CREATE_SUSPENDED, NULL, NULL, &si, &pi)) {
       HandleError("CreateProcess");
     }
 
 
-    //TODO validate we have the correct version of this process
+    // Make sure we are trying to launch the supported version of the game
+    if (!buildLimit.Check(pi.hProcess) || !buildLimitAccess.Check(pi.hProcess) || !populationCap.Check(pi.hProcess)) {
+      TerminateProcess(pi.hProcess, 0);
+      throw std::exception("The process game version doesn't match the only supported version. Launch aborted.");
+    }
 
 
     // Patch the process memory

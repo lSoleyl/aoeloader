@@ -101,6 +101,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="hexstring.h" />
     <ClInclude Include="win_error.h" />
     <ClInclude Include="patch_memory.h" />
   </ItemGroup>
